@@ -3,12 +3,17 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import AuditEvent, Branch, Order, OrderItem, Staff
+from app.db.models import AuditEvent, Branch, CashShift, Order, OrderItem, Staff
+from app.schemas.cash_shift import (
+    CashShiftSyncResultResponse,
+    ParrotCashShiftPayload,
+    ParrotCashShiftSyncPayload,
+)
 from app.schemas.order import ParrotOrderPayload, ParrotSyncPayload, SyncResultResponse
 
 
 class ParrotIngestionService:
-    """Ingests raw Parrot POS order payloads into the itable data model."""
+    """Ingests raw Parrot POS payloads (orders, cash shifts) into the itable data model."""
 
     def __init__(self, db: Session, tenant_id: uuid.UUID) -> None:
         self.db = db
@@ -163,3 +168,59 @@ class ParrotIngestionService:
         self.db.add(event)
         self.db.flush()
         return event
+
+    def process_cash_shifts_payload(
+        self, payload: ParrotCashShiftSyncPayload
+    ) -> CashShiftSyncResultResponse:
+        shifts_created = 0
+        shifts_skipped_duplicate = 0
+        staff_created = 0
+
+        for raw_shift in payload.shifts:
+            if self._cash_shift_exists(raw_shift.external_shift_id):
+                shifts_skipped_duplicate += 1
+                continue
+
+            staff = None
+            if raw_shift.staff_external_id:
+                staff, was_created = self._get_or_create_staff(
+                    external_id=raw_shift.staff_external_id,
+                    name=raw_shift.staff_name or raw_shift.staff_external_id,
+                )
+                staff_created += int(was_created)
+
+            self._create_cash_shift(raw_shift, staff_id=staff.id if staff else None)
+            shifts_created += 1
+
+        self.db.commit()
+
+        return CashShiftSyncResultResponse(
+            shifts_received=len(payload.shifts),
+            shifts_created=shifts_created,
+            shifts_skipped_duplicate=shifts_skipped_duplicate,
+            staff_created=staff_created,
+        )
+
+    def _cash_shift_exists(self, external_shift_id: str) -> bool:
+        stmt = select(CashShift.id).where(
+            CashShift.tenant_id == self.tenant_id,
+            CashShift.external_shift_id == external_shift_id,
+        )
+        return self.db.execute(stmt).scalar_one_or_none() is not None
+
+    def _create_cash_shift(
+        self, raw_shift: ParrotCashShiftPayload, staff_id: uuid.UUID | None
+    ) -> CashShift:
+        shift = CashShift(
+            tenant_id=self.tenant_id,
+            staff_id=staff_id,
+            external_shift_id=raw_shift.external_shift_id,
+            expected_cash=raw_shift.expected_cash,
+            actual_cash=raw_shift.actual_cash,
+            discrepancy=raw_shift.actual_cash - raw_shift.expected_cash,
+            shift_start=raw_shift.shift_start,
+            shift_end=raw_shift.shift_end,
+        )
+        self.db.add(shift)
+        self.db.flush()
+        return shift

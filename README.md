@@ -97,6 +97,14 @@ cada platillo en:
 3. Si la orden viene `CANCELLED` o con `discount_amount > 0`, crea el `AuditEvent`
    correspondiente (`CANCELLED_ORDER` / `DISCOUNT`) con monto, fecha, razón y mesero.
 
+`process_cash_shifts_payload` procesa el payload de cortes de caja de Parrot POS:
+
+1. Previene duplicados verificando `tenant_id` + `external_shift_id`.
+2. Crea automáticamente el `Staff` (cajero) si no existe, reutilizando la misma lógica
+   de auto-registro que usan las órdenes.
+3. Calcula `discrepancy = actual_cash - expected_cash` y guarda el `CashShift`, que luego
+   alimenta a `CajaAnalyticsEngine`.
+
 ## Endpoints
 
 | Método | Ruta                                              | Descripción                                   |
@@ -105,6 +113,7 @@ cada platillo en:
 | POST   | `/api/v1/tenants`                                  | Alta de un nuevo tenant (restaurante/cliente)   |
 | GET    | `/api/v1/tenants/{tenant_id}`                      | Detalle de un tenant                            |
 | POST   | `/api/v1/sync/{tenant_id}`                         | Ingesta de órdenes desde Parrot POS             |
+| POST   | `/api/v1/sync/{tenant_id}/cash-shifts`             | Ingesta de cortes/turnos de caja desde Parrot POS |
 | GET    | `/api/v1/dashboard/summary/{tenant_id}`            | KPIs ejecutivos consolidados                    |
 | GET    | `/api/v1/analytics/staff-audit/{tenant_id}`        | Auditoría completa de meseros con semáforo      |
 | GET    | `/api/v1/analytics/cash-audit/{tenant_id}`         | Descuadres acumulados por cajero                |

@@ -84,3 +84,46 @@ def test_sync_and_dashboard_flow(client):
 
     cash_resp = client.get(f"/api/v1/analytics/cash-audit/{tenant_id}")
     assert cash_resp.status_code == 200
+
+
+def test_cash_shift_sync_and_audit_flow(client):
+    tenant_resp = client.post(
+        "/api/v1/tenants", json={"name": "Restaurante Caja", "slug": "restaurante-caja-test"}
+    )
+    tenant_id = tenant_resp.json()["id"]
+
+    payload = {
+        "shifts": [
+            {
+                "external_shift_id": "SH-API-1",
+                "staff_external_id": "C-API-1",
+                "staff_name": "Luis Cajero",
+                "expected_cash": "1000.00",
+                "actual_cash": "950.00",
+                "shift_start": "2026-01-01T08:00:00Z",
+                "shift_end": "2026-01-01T16:00:00Z",
+            }
+        ]
+    }
+    sync_resp = client.post(f"/api/v1/sync/{tenant_id}/cash-shifts", json=payload)
+    assert sync_resp.status_code == 201
+    assert sync_resp.json() == {
+        "shifts_received": 1,
+        "shifts_created": 1,
+        "shifts_skipped_duplicate": 0,
+        "staff_created": 1,
+    }
+
+    dedup_resp = client.post(f"/api/v1/sync/{tenant_id}/cash-shifts", json=payload)
+    assert dedup_resp.json()["shifts_skipped_duplicate"] == 1
+
+    cash_resp = client.get(f"/api/v1/analytics/cash-audit/{tenant_id}")
+    assert cash_resp.status_code == 200
+    body = cash_resp.json()
+    assert body["total_accumulated_discrepancy"] == "-50.00"
+    assert body["cashiers"][0]["staff_name"] == "Luis Cajero"
+
+
+def test_cash_shift_sync_for_missing_tenant_returns_404(client):
+    response = client.post(f"/api/v1/sync/{uuid.uuid4()}/cash-shifts", json={"shifts": []})
+    assert response.status_code == 404
