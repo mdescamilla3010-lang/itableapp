@@ -133,6 +133,37 @@ alembic downgrade -1
 La migración inicial (`alembic/versions/d1d0b376db08_initial_schema.py`) crea las 7 tablas
 del modelo de datos con sus índices y foreign keys (`CASCADE` / `SET NULL` según corresponda).
 
+## Tests
+
+Los tests (`tests/`) corren contra una base PostgreSQL real (no SQLite/mocks), previamente
+migrada con Alembic. Cada test parte de una base limpia gracias a un fixture `autouse` en
+`tests/conftest.py` que borra los `Tenant` al finalizar (cascada al resto de las tablas).
+
+```bash
+pip install -r requirements-dev.txt
+
+# Contra una base de pruebas dedicada
+export DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/itable_test
+alembic upgrade head
+pytest -v
+```
+
+Cobertura actual: ingesta (`test_ingestion.py`), motor de fugas/Z-Score (`test_analytics_fugas.py`),
+auditoría de caja (`test_analytics_caja.py`), ingeniería de menú (`test_analytics_menu.py`) y los
+endpoints REST end-to-end (`test_api.py`).
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` corre en cada push/PR a `main`:
+
+1. Levanta un servicio `postgres:16` (con health check) como base de datos del job.
+2. Instala `requirements-dev.txt`.
+3. Aplica el esquema con `alembic upgrade head`.
+4. Corre `pytest -v`.
+
+Así el pipeline valida en cada cambio que las migraciones se apliquen limpio sobre una base
+nueva y que la suite de tests pase contra ese esquema real.
+
 ## Levantar el proyecto
 
 ```bash
