@@ -21,6 +21,17 @@ def test_create_tenant_and_duplicate_slug_conflict(client):
     assert r3.json()["slug"] == "restaurante-api-test"
 
 
+def test_list_tenants_includes_created_tenant(client):
+    payload = {"name": "Restaurante Listado", "slug": "restaurante-listado-test"}
+    create_resp = client.post("/api/v1/tenants", json=payload)
+    tenant_id = create_resp.json()["id"]
+
+    response = client.get("/api/v1/tenants")
+    assert response.status_code == 200
+    ids = [t["id"] for t in response.json()]
+    assert tenant_id in ids
+
+
 def test_get_missing_tenant_returns_404(client):
     response = client.get(f"/api/v1/tenants/{uuid.uuid4()}")
     assert response.status_code == 404

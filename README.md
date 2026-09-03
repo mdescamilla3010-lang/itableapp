@@ -1,15 +1,21 @@
-# itable app — Backend MVP
+# itable app
 
 Plataforma SaaS B2B de Business Intelligence y Auditoria Operativa para restaurantes,
-conectada vía API a POS externos (ej. Parrot POS).
+conectada vía API a POS externos (ej. Parrot POS). Este repo contiene el backend (`app/`) y
+el frontend (`frontend/`) — ver [`frontend/README.md`](frontend/README.md) para la SPA.
 
 ## Stack
 
+**Backend**
 - Python 3.11+
 - FastAPI
 - PostgreSQL + SQLAlchemy 2.0 (ORM tipado)
 - Pydantic v2
 - NumPy / Pandas para los motores de analítica
+
+**Frontend** (`frontend/`, detalle completo en su propio README)
+- React 19 + TypeScript + Vite
+- React Router 7, TanStack Query 5
 
 ## Arquitectura
 
@@ -110,6 +116,7 @@ cada platillo en:
 | Método | Ruta                                              | Descripción                                   |
 |--------|---------------------------------------------------|------------------------------------------------|
 | GET    | `/api/v1/health`                                   | Estado de la aplicación                        |
+| GET    | `/api/v1/tenants`                                  | Listado de tenants                              |
 | POST   | `/api/v1/tenants`                                  | Alta de un nuevo tenant (restaurante/cliente)   |
 | GET    | `/api/v1/tenants/{tenant_id}`                      | Detalle de un tenant                            |
 | POST   | `/api/v1/sync/{tenant_id}`                         | Ingesta de órdenes desde Parrot POS             |
@@ -172,6 +179,20 @@ endpoints REST end-to-end (`test_api.py`).
 
 Así el pipeline valida en cada cambio que las migraciones se apliquen limpio sobre una base
 nueva y que la suite de tests pase contra ese esquema real.
+
+## Frontend
+
+La SPA vive en `frontend/` (React + Vite + TypeScript) y consume esta API. Documentación
+completa, estructura de carpetas y pantallas en [`frontend/README.md`](frontend/README.md).
+
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5173, proxea /api al backend en :8000
+```
+
+El backend habilita CORS vía `CORS_ORIGINS` en `.env` (por defecto `*`, suficiente para
+desarrollo local); en producción restríngelo al origen real del frontend desplegado.
 
 ## Levantar el proyecto
 

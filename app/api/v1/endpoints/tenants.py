@@ -12,6 +12,14 @@ from app.schemas.tenant import TenantCreate, TenantRead
 router = APIRouter()
 
 
+@router.get("/tenants", response_model=list[TenantRead])
+def list_tenants(
+    limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+) -> list[Tenant]:
+    stmt = select(Tenant).order_by(Tenant.created_at.desc()).limit(limit).offset(offset)
+    return list(db.execute(stmt).scalars().all())
+
+
 @router.post("/tenants", response_model=TenantRead, status_code=status.HTTP_201_CREATED)
 def create_tenant(payload: TenantCreate, db: Session = Depends(get_db)) -> Tenant:
     tenant = Tenant(
