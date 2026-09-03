@@ -15,7 +15,7 @@ conectada vía API a POS externos (ej. Parrot POS).
 
 ```
 app/
-├── main.py                 # Entrypoint FastAPI, crea las tablas al iniciar
+├── main.py                 # Entrypoint FastAPI (el esquema lo gestiona Alembic, no la app)
 ├── core/
 │   └── config.py           # Configuración vía variables de entorno (pydantic-settings)
 ├── db/
@@ -34,9 +34,16 @@ app/
     ├── router.py
     └── endpoints/
         ├── health.py
+        ├── tenants.py
         ├── sync.py
         ├── dashboard.py
         └── analytics.py
+
+alembic/
+├── env.py                   # Usa app.core.config.settings.DATABASE_URL y Base.metadata
+└── versions/
+    └── d1d0b376db08_initial_schema.py
+alembic.ini
 ```
 
 ## Modelo de datos (multi-tenant)
@@ -95,11 +102,36 @@ cada platillo en:
 | Método | Ruta                                              | Descripción                                   |
 |--------|---------------------------------------------------|------------------------------------------------|
 | GET    | `/api/v1/health`                                   | Estado de la aplicación                        |
+| POST   | `/api/v1/tenants`                                  | Alta de un nuevo tenant (restaurante/cliente)   |
+| GET    | `/api/v1/tenants/{tenant_id}`                      | Detalle de un tenant                            |
 | POST   | `/api/v1/sync/{tenant_id}`                         | Ingesta de órdenes desde Parrot POS             |
 | GET    | `/api/v1/dashboard/summary/{tenant_id}`            | KPIs ejecutivos consolidados                    |
 | GET    | `/api/v1/analytics/staff-audit/{tenant_id}`        | Auditoría completa de meseros con semáforo      |
 | GET    | `/api/v1/analytics/cash-audit/{tenant_id}`         | Descuadres acumulados por cajero                |
 | GET    | `/api/v1/analytics/menu-engineering/{tenant_id}`   | Matriz de ingeniería de menú clasificada        |
+
+`POST /api/v1/tenants` devuelve `409 Conflict` si el `slug` ya existe (debe ser único por tenant).
+
+## Migraciones (Alembic)
+
+El esquema de base de datos se gestiona exclusivamente con **Alembic** — la app ya no crea
+tablas automáticamente al arrancar (`Base.metadata.create_all` fue removido de `main.py`).
+`alembic/env.py` lee `DATABASE_URL` directamente de `app.core.config.settings`, así que basta
+con tener el `.env` configurado.
+
+```bash
+# Aplicar todas las migraciones pendientes (requerido antes de levantar la app)
+alembic upgrade head
+
+# Generar una nueva migración tras modificar app/db/models.py
+alembic revision --autogenerate -m "descripcion del cambio"
+
+# Revertir la última migración
+alembic downgrade -1
+```
+
+La migración inicial (`alembic/versions/d1d0b376db08_initial_schema.py`) crea las 7 tablas
+del modelo de datos con sus índices y foreign keys (`CASCADE` / `SET NULL` según corresponda).
 
 ## Levantar el proyecto
 
@@ -111,6 +143,7 @@ pip install -r requirements.txt
 cp .env.example .env
 # Ajusta DATABASE_URL a tu instancia de PostgreSQL
 
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
