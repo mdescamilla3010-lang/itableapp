@@ -6,7 +6,7 @@ import { MenuCategoryPill } from "../components/ui/MenuCategoryPill";
 import { PageHeader } from "../components/ui/PageHeader";
 import { QueryState } from "../components/ui/QueryState";
 import { StatTile } from "../components/ui/StatTile";
-import { useTenantContext } from "../context/TenantContext";
+import { useTenantContext } from "../context/useTenantContext";
 import type { MenuCategory, MenuItemAnalysis } from "../api/types";
 import { MENU_CATEGORY_DESCRIPTIONS, MENU_CATEGORY_LABELS } from "../lib/labels";
 import { formatCurrency, formatNumber } from "../lib/format";

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { tenantsApi } from "../../api/tenants";
-import { useTenantContext } from "../../context/TenantContext";
+import { useTenantContext } from "../../context/useTenantContext";
 import { ChevronDownIcon } from "./icons";
 
 export function TenantSwitcher() {

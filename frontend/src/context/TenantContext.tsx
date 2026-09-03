@@ -1,14 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { TenantContext } from "./tenantContextStore";
 
 const STORAGE_KEY = "itable:currentTenantId";
-
-interface TenantContextValue {
-  currentTenantId: string | null;
-  selectTenant: (tenantId: string) => void;
-  clearTenant: () => void;
-}
-
-const TenantContext = createContext<TenantContextValue | undefined>(undefined);
 
 export function TenantProvider({ children }: { children: ReactNode }) {
   const [currentTenantId, setCurrentTenantId] = useState<string | null>(() => {
@@ -43,12 +36,4 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   );
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
-}
-
-export function useTenantContext(): TenantContextValue {
-  const ctx = useContext(TenantContext);
-  if (!ctx) {
-    throw new Error("useTenantContext must be used within a TenantProvider");
-  }
-  return ctx;
 }

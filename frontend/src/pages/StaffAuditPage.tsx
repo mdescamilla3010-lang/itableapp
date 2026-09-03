@@ -6,7 +6,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { QueryState } from "../components/ui/QueryState";
 import { RiskPill } from "../components/ui/RiskPill";
 import { StatTile } from "../components/ui/StatTile";
-import { useTenantContext } from "../context/TenantContext";
+import { useTenantContext } from "../context/useTenantContext";
 import { formatCurrency, formatNumber } from "../lib/format";
 
 export function StaffAuditPage() {

@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useTenantContext } from "../../context/TenantContext";
+import { useTenantContext } from "../../context/useTenantContext";
 
 export function RequireTenant() {
   const { currentTenantId } = useTenantContext();

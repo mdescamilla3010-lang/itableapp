@@ -8,7 +8,7 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { PageHeader } from "../components/ui/PageHeader";
 import { LoadingRow } from "../components/ui/Spinner";
-import { useTenantContext } from "../context/TenantContext";
+import { useTenantContext } from "../context/useTenantContext";
 import { formatDate } from "../lib/format";
 import { slugify } from "../lib/slugify";
 

@@ -5,7 +5,7 @@ import { ApiError } from "../api/client";
 import { Card } from "../components/ui/Card";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { PageHeader } from "../components/ui/PageHeader";
-import { useTenantContext } from "../context/TenantContext";
+import { useTenantContext } from "../context/useTenantContext";
 
 const EXAMPLE_ORDERS_PAYLOAD = {
   orders: [
