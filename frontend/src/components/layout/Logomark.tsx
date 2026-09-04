@@ -1,11 +1,11 @@
 export function Logomark({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <rect width="48" height="48" rx="11" fill="var(--color-primary)" />
-      <rect x="10" y="10" width="12" height="12" rx="2.5" fill="#FBEAE1" />
-      <rect x="26" y="10" width="12" height="12" rx="2.5" fill="#FBEAE1" fillOpacity="0.55" />
-      <rect x="10" y="26" width="12" height="12" rx="2.5" fill="#FBEAE1" fillOpacity="0.55" />
-      <rect x="26" y="26" width="12" height="12" rx="2.5" fill="#FBEAE1" />
+      <rect width="48" height="48" rx="11" fill="#0E1A2E" />
+      <rect x="10" y="27" width="7" height="11" rx="1.6" fill="#29B6F6" />
+      <rect x="20.5" y="21" width="7" height="17" rx="1.6" fill="#29B6F6" />
+      <rect x="31" y="14" width="7" height="24" rx="1.6" fill="#34D399" />
+      <circle cx="34.5" cy="10.3" r="3.3" fill="#34D399" />
     </svg>
   );
 }
