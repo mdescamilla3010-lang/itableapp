@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +14,18 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
 
     DATABASE_URL: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/itable"
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def _use_psycopg2_driver(cls, value: str) -> str:
+        # Managed Postgres providers (Railway, Render, Heroku-style addons)
+        # hand out a bare "postgres://" or "postgresql://" URL; SQLAlchemy
+        # needs the driver spelled out to pick psycopg2 over asyncpg etc.
+        if value.startswith("postgres://"):
+            return "postgresql+psycopg2://" + value[len("postgres://") :]
+        if value.startswith("postgresql://"):
+            return "postgresql+psycopg2://" + value[len("postgresql://") :]
+        return value
 
     PARROT_API_BASE_URL: str = "https://api.parrotpos.com"
 

@@ -4,6 +4,8 @@ Plataforma SaaS B2B de Business Intelligence y Auditoria Operativa para restaura
 conectada vía API a POS externos (ej. Parrot POS). Este repo contiene el backend (`app/`) y
 el frontend (`frontend/`) — ver [`frontend/README.md`](frontend/README.md) para la SPA.
 
+¿Buscas ponerlo en una URL pública real? Ver [`DEPLOY.md`](DEPLOY.md) (guía para Railway).
+
 ## Stack
 
 **Backend**
