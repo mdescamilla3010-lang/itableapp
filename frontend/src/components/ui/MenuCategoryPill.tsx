@@ -9,5 +9,10 @@ const VARIANT: Record<MenuCategory, string> = {
 };
 
 export function MenuCategoryPill({ category }: { category: MenuCategory }) {
-  return <span className={`pill ${VARIANT[category]}`}>{MENU_CATEGORY_LABELS[category]}</span>;
+  return (
+    <span className={`pill ${VARIANT[category]}`}>
+      <span className="pill__dot" />
+      {MENU_CATEGORY_LABELS[category]}
+    </span>
+  );
 }

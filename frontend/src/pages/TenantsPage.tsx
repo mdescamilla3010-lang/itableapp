@@ -132,6 +132,7 @@ export function TenantsPage() {
                       {tenant.name}
                       {tenant.id === currentTenantId && (
                         <span className="pill pill--primary" style={{ marginLeft: "8px" }}>
+                          <span className="pill__dot" />
                           Activo
                         </span>
                       )}
@@ -140,6 +141,7 @@ export function TenantsPage() {
                     <td>{tenant.subscription_plan}</td>
                     <td>
                       <span className={`pill ${tenant.is_active ? "pill--success" : "pill--neutral"}`}>
+                        <span className="pill__dot" />
                         {tenant.is_active ? "Activo" : "Inactivo"}
                       </span>
                     </td>

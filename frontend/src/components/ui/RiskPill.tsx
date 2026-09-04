@@ -8,5 +8,10 @@ const VARIANT: Record<RiskLevel, string> = {
 };
 
 export function RiskPill({ level }: { level: RiskLevel }) {
-  return <span className={`pill ${VARIANT[level]}`}>{RISK_LABELS[level]}</span>;
+  return (
+    <span className={`pill ${VARIANT[level]}`}>
+      <span className="pill__dot" />
+      {RISK_LABELS[level]}
+    </span>
+  );
 }

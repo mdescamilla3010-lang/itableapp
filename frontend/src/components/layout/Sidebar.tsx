@@ -7,6 +7,7 @@ import {
   UsersIcon,
   WalletIcon,
 } from "./icons";
+import { Logomark } from "./Logomark";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: DashboardIcon, end: true },
@@ -21,7 +22,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <div className="sidebar__brand-mark">it</div>
+        <Logomark size={30} />
         <span className="sidebar__brand-name">itable app</span>
       </div>
 
