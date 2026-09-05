@@ -4,6 +4,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.order import SyncResultResponse
+
 
 class ParrotCashShiftPayload(BaseModel):
     """Raw shape of a single cash-register shift as sent by Parrot POS."""
@@ -28,6 +30,11 @@ class CashShiftSyncResultResponse(BaseModel):
     shifts_created: int
     shifts_skipped_duplicate: int
     staff_created: int
+
+
+class DemoDataSeedResponse(BaseModel):
+    orders: SyncResultResponse
+    cash_shifts: CashShiftSyncResultResponse
 
 
 class CashShiftRead(BaseModel):

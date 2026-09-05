@@ -85,6 +85,8 @@ export function SyncTestPage() {
         description="Envía un payload de ejemplo (estilo Parrot POS) al tenant seleccionado para ver la ingesta funcionando en vivo."
       />
 
+      <DemoDataCard tenantId={tenantId} />
+
       <div className="tabs">
         <button className={`tab${tab === "orders" ? " active" : ""}`} onClick={() => setTab("orders")}>
           Órdenes
@@ -115,6 +117,49 @@ export function SyncTestPage() {
         />
       )}
     </>
+  );
+}
+
+function DemoDataCard({ tenantId }: { tenantId: string }) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: () => syncApi.seedDemoData(tenantId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["staff-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["menu-engineering"] });
+      queryClient.invalidateQueries({ queryKey: ["cash-audit"] });
+    },
+  });
+
+  return (
+    <Card
+      title="Generar datos de demostración"
+      subtitle="Crea ~3 semanas de ventas, meseros y cortes de caja de ejemplo para este tenant, con un clic — sin necesidad de terminal ni de un POS real conectado."
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {mutation.isError && <ErrorBanner error={mutation.error} />}
+        {mutation.isSuccess && (
+          <div className="banner banner--success">
+            <span>✓</span>
+            <span>
+              Listo: {mutation.data.orders.orders_created} órdenes y{" "}
+              {mutation.data.cash_shifts.shifts_created} cortes de caja creados. Revisa el Dashboard.
+            </span>
+          </div>
+        )}
+        <div>
+          <button
+            className="btn btn--primary"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Generando…" : "Generar datos de demo"}
+          </button>
+        </div>
+      </div>
+    </Card>
   );
 }
 

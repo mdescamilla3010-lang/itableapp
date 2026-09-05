@@ -82,6 +82,11 @@ export interface SyncCashShiftsResult {
   staff_created: number;
 }
 
+export interface DemoDataSeedResult {
+  orders: SyncOrdersResult;
+  cash_shifts: SyncCashShiftsResult;
+}
+
 export interface WaiterAnomaly {
   staff_id: string | null;
   staff_name: string;
