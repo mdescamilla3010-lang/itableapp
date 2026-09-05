@@ -1,6 +1,8 @@
 import { api } from "./client";
 import type {
+  CashShiftsFileImportResult,
   DemoDataSeedResult,
+  OrdersFileImportResult,
   SyncCashShiftsPayload,
   SyncCashShiftsResult,
   SyncOrdersPayload,
@@ -14,4 +16,8 @@ export const syncApi = {
     api.post<SyncCashShiftsResult>(`/sync/${tenantId}/cash-shifts`, payload),
   seedDemoData: (tenantId: string) =>
     api.post<DemoDataSeedResult>(`/sync/${tenantId}/demo-data`, {}),
+  uploadOrdersFile: (tenantId: string, file: File) =>
+    api.postFile<OrdersFileImportResult>(`/sync/${tenantId}/upload/orders`, file),
+  uploadCashShiftsFile: (tenantId: string, file: File) =>
+    api.postFile<CashShiftsFileImportResult>(`/sync/${tenantId}/upload/cash-shifts`, file),
 };

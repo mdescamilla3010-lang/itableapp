@@ -37,6 +37,14 @@ class DemoDataSeedResponse(BaseModel):
     cash_shifts: CashShiftSyncResultResponse
 
 
+class OrdersFileImportResponse(SyncResultResponse):
+    rows_skipped_invalid: int
+
+
+class CashShiftsFileImportResponse(CashShiftSyncResultResponse):
+    rows_skipped_invalid: int
+
+
 class CashShiftRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

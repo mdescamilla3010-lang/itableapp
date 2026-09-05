@@ -87,6 +87,14 @@ export interface DemoDataSeedResult {
   cash_shifts: SyncCashShiftsResult;
 }
 
+export interface OrdersFileImportResult extends SyncOrdersResult {
+  rows_skipped_invalid: number;
+}
+
+export interface CashShiftsFileImportResult extends SyncCashShiftsResult {
+  rows_skipped_invalid: number;
+}
+
 export interface WaiterAnomaly {
   staff_id: string | null;
   staff_name: string;

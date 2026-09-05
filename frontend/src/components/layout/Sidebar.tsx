@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { to: "/staff-audit", label: "Auditoría de meseros", icon: UsersIcon },
   { to: "/menu-engineering", label: "Ingeniería de menú", icon: GridIcon },
   { to: "/cash-audit", label: "Auditoría de caja", icon: WalletIcon },
-  { to: "/sync-test", label: "Probar ingesta", icon: UploadIcon },
+  { to: "/sync-test", label: "Ingesta de datos", icon: UploadIcon },
   { to: "/tenants", label: "Tenants", icon: BuildingIcon },
 ];
 
