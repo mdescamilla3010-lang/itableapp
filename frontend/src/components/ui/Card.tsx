@@ -16,7 +16,7 @@ export function Card({ title, subtitle, action, children }: CardProps) {
             {title && <h3 className="card__title">{title}</h3>}
             {subtitle && <p className="card__subtitle">{subtitle}</p>}
           </div>
-          {action}
+          {action && <div className="card__action">{action}</div>}
         </div>
       )}
       {children}

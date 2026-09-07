@@ -261,6 +261,11 @@ textarea {
   margin-bottom: var(--space-4);
 }
 
+.card__action {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .card__title {
   font-size: 15px;
   font-weight: 600;
