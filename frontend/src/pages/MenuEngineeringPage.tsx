@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { analyticsApi } from "../api/analytics";
 import { Card } from "../components/ui/Card";
+import { BranchSelector } from "../components/ui/BranchSelector";
 import { EmptyState } from "../components/ui/EmptyState";
 import { MenuCategoryPill } from "../components/ui/MenuCategoryPill";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -34,10 +36,11 @@ function countByCategory(items: MenuItemAnalysis[]) {
 export function MenuEngineeringPage() {
   const { currentTenantId } = useTenantContext();
   const tenantId = currentTenantId as string;
+  const [branchId, setBranchId] = useState<string | null>(null);
 
   const menuQuery = useQuery({
-    queryKey: ["menu-engineering", tenantId],
-    queryFn: () => analyticsApi.menuEngineering(tenantId),
+    queryKey: ["menu-engineering", tenantId, branchId],
+    queryFn: () => analyticsApi.menuEngineering(tenantId, branchId),
   });
 
   return (
@@ -45,6 +48,7 @@ export function MenuEngineeringPage() {
       <PageHeader
         title="Ingeniería de menú"
         description="Matriz de Kasavana & Smith: popularidad de venta vs. margen de ganancia por platillo."
+        action={<BranchSelector tenantId={tenantId} value={branchId} onChange={setBranchId} />}
       />
 
       <QueryState {...menuQuery} loadingLabel="Clasificando platillos…">

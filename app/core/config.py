@@ -29,6 +29,11 @@ class Settings(BaseSettings):
 
     PARROT_API_BASE_URL: str = "https://api.parrotpos.com"
 
+    # Used to salt per-tenant access codes (app/core/access_code.py). Set a
+    # real random value via the SECRET_KEY env var in production — the
+    # default here is fine for local dev only.
+    SECRET_KEY: str = "dev-only-insecure-secret-change-in-production"
+
     # CORS: comma-separated list of allowed origins for the frontend (e.g. the
     # Vite dev server). "*" is a permissive default suitable for this MVP,
     # which has no auth yet; restrict it once real auth is in place.

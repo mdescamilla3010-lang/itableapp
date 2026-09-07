@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.db.models import AuditEvent, Staff
+from app.db.models import AuditEvent, Order, Staff
 from app.schemas.analytics import FugasAuditReport, RiskLevel, WaiterAnomaly
 
 
@@ -24,9 +24,10 @@ class _WaiterAccumulator:
 class FugasAnalyticsEngine:
     """Detects abnormal cancellation/discount behavior per waiter using Z-Score."""
 
-    def __init__(self, db: Session, tenant_id: uuid.UUID) -> None:
+    def __init__(self, db: Session, tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        self.branch_id = branch_id
 
     def analyze_waiter_anomalies(self) -> FugasAuditReport:
         accumulators = self._aggregate_events_by_staff()
@@ -76,6 +77,10 @@ class FugasAnalyticsEngine:
             .outerjoin(Staff, AuditEvent.staff_id == Staff.id)
             .where(AuditEvent.tenant_id == self.tenant_id)
         )
+        if self.branch_id is not None:
+            stmt = stmt.join(Order, AuditEvent.order_id == Order.id).where(
+                Order.branch_id == self.branch_id
+            )
         rows = self.db.execute(stmt).all()
 
         accumulators: dict[uuid.UUID | None, _WaiterAccumulator] = defaultdict(

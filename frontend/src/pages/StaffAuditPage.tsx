@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { analyticsApi } from "../api/analytics";
 import { Card } from "../components/ui/Card";
+import { BranchSelector } from "../components/ui/BranchSelector";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeader } from "../components/ui/PageHeader";
 import { QueryState } from "../components/ui/QueryState";
@@ -12,10 +14,11 @@ import { formatCurrency, formatNumber } from "../lib/format";
 export function StaffAuditPage() {
   const { currentTenantId } = useTenantContext();
   const tenantId = currentTenantId as string;
+  const [branchId, setBranchId] = useState<string | null>(null);
 
   const auditQuery = useQuery({
-    queryKey: ["staff-audit", tenantId],
-    queryFn: () => analyticsApi.staffAudit(tenantId),
+    queryKey: ["staff-audit", tenantId, branchId],
+    queryFn: () => analyticsApi.staffAudit(tenantId, branchId),
   });
 
   return (
@@ -23,6 +26,7 @@ export function StaffAuditPage() {
       <PageHeader
         title="Auditoría de meseros"
         description="Z-Score de cancelaciones y descuentos por mesero, comparado contra el promedio del restaurante."
+        action={<BranchSelector tenantId={tenantId} value={branchId} onChange={setBranchId} />}
       />
 
       <QueryState {...auditQuery} loadingLabel="Analizando cancelaciones…">

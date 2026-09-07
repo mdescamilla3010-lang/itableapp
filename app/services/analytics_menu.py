@@ -33,9 +33,10 @@ class _ProductAccumulator:
 class MenuEngineeringEngine:
     """Classifies menu items using the Kasavana & Smith engineering matrix."""
 
-    def __init__(self, db: Session, tenant_id: uuid.UUID) -> None:
+    def __init__(self, db: Session, tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        self.branch_id = branch_id
 
     def analyze_menu(self) -> MenuEngineeringReport:
         accumulators = self._aggregate_items_by_product()
@@ -102,6 +103,8 @@ class MenuEngineeringEngine:
             .join(Order, OrderItem.order_id == Order.id)
             .where(Order.tenant_id == self.tenant_id, Order.status != "CANCELLED")
         )
+        if self.branch_id is not None:
+            stmt = stmt.where(Order.branch_id == self.branch_id)
         items = self.db.execute(stmt).scalars().all()
 
         accumulators: dict[str, _ProductAccumulator] = {}

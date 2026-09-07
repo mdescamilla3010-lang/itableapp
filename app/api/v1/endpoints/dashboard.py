@@ -15,19 +15,22 @@ router = APIRouter()
 
 
 @router.get("/dashboard/summary/{tenant_id}", response_model=DashboardSummary)
-def get_dashboard_summary(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> DashboardSummary:
+def get_dashboard_summary(
+    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+) -> DashboardSummary:
     tenant = db.execute(select(Tenant).where(Tenant.id == tenant_id)).scalar_one_or_none()
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")
 
-    total_sales = db.execute(
-        select(func.coalesce(func.sum(Order.total_amount), 0)).where(
-            Order.tenant_id == tenant_id, Order.status != "CANCELLED"
-        )
-    ).scalar_one()
+    sales_stmt = select(func.coalesce(func.sum(Order.total_amount), 0)).where(
+        Order.tenant_id == tenant_id, Order.status != "CANCELLED"
+    )
+    if branch_id is not None:
+        sales_stmt = sales_stmt.where(Order.branch_id == branch_id)
+    total_sales = db.execute(sales_stmt).scalar_one()
 
-    fugas_report = FugasAnalyticsEngine(db=db, tenant_id=tenant_id).analyze_waiter_anomalies()
-    menu_report = MenuEngineeringEngine(db=db, tenant_id=tenant_id).analyze_menu()
+    fugas_report = FugasAnalyticsEngine(db=db, tenant_id=tenant_id, branch_id=branch_id).analyze_waiter_anomalies()
+    menu_report = MenuEngineeringEngine(db=db, tenant_id=tenant_id, branch_id=branch_id).analyze_menu()
 
     top_risk_waiters = [
         TopWaiterRisk(

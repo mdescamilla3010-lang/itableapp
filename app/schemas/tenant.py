@@ -20,6 +20,26 @@ class TenantRead(TenantBase):
 
     id: uuid.UUID
     created_at: datetime
+    code_required: bool = False
+
+
+class TenantCreated(TenantRead):
+    """Returned only from the create-tenant call: carries the plaintext
+    access code, which is never retrievable again afterwards."""
+
+    access_code: str
+
+
+class AccessCodeVerifyRequest(BaseModel):
+    code: str
+
+
+class AccessCodeVerifyResponse(BaseModel):
+    valid: bool
+
+
+class AccessCodeRotateResponse(BaseModel):
+    access_code: str
 
 
 class BranchRead(BaseModel):

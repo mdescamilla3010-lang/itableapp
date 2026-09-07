@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { analyticsApi } from "../api/analytics";
 import { Card } from "../components/ui/Card";
+import { BranchSelector } from "../components/ui/BranchSelector";
 import { EmptyState } from "../components/ui/EmptyState";
 import { PageHeader } from "../components/ui/PageHeader";
 import { QueryState } from "../components/ui/QueryState";
@@ -13,10 +15,11 @@ import { formatCurrency, formatNumber } from "../lib/format";
 export function DashboardPage() {
   const { currentTenantId } = useTenantContext();
   const tenantId = currentTenantId as string;
+  const [branchId, setBranchId] = useState<string | null>(null);
 
   const summaryQuery = useQuery({
-    queryKey: ["dashboard-summary", tenantId],
-    queryFn: () => analyticsApi.dashboardSummary(tenantId),
+    queryKey: ["dashboard-summary", tenantId, branchId],
+    queryFn: () => analyticsApi.dashboardSummary(tenantId, branchId),
   });
 
   return (
@@ -24,6 +27,7 @@ export function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="KPIs ejecutivos consolidados de ventas, fugas de personal y desempeño de menú."
+        action={<BranchSelector tenantId={tenantId} value={branchId} onChange={setBranchId} />}
       />
 
       <QueryState {...summaryQuery} loadingLabel="Calculando KPIs…">

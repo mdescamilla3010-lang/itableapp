@@ -21,9 +21,11 @@ def _ensure_tenant_exists(tenant_id: uuid.UUID, db: Session) -> None:
 
 
 @router.get("/analytics/staff-audit/{tenant_id}", response_model=FugasAuditReport)
-def get_staff_audit(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> FugasAuditReport:
+def get_staff_audit(
+    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+) -> FugasAuditReport:
     _ensure_tenant_exists(tenant_id, db)
-    engine = FugasAnalyticsEngine(db=db, tenant_id=tenant_id)
+    engine = FugasAnalyticsEngine(db=db, tenant_id=tenant_id, branch_id=branch_id)
     return engine.analyze_waiter_anomalies()
 
 
@@ -35,7 +37,9 @@ def get_cash_audit(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> CajaA
 
 
 @router.get("/analytics/menu-engineering/{tenant_id}", response_model=MenuEngineeringReport)
-def get_menu_engineering(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> MenuEngineeringReport:
+def get_menu_engineering(
+    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+) -> MenuEngineeringReport:
     _ensure_tenant_exists(tenant_id, db)
-    engine = MenuEngineeringEngine(db=db, tenant_id=tenant_id)
+    engine = MenuEngineeringEngine(db=db, tenant_id=tenant_id, branch_id=branch_id)
     return engine.analyze_menu()

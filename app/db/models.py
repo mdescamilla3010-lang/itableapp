@@ -27,6 +27,7 @@ class Tenant(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     parrot_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    access_code_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     subscription_plan: Mapped[str] = mapped_column(String(50), nullable=False, default="pro")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -37,6 +38,10 @@ class Tenant(Base):
     staff_members: Mapped[list["Staff"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
     orders: Mapped[list["Order"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
     cash_shifts: Mapped[list["CashShift"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
+
+    @property
+    def code_required(self) -> bool:
+        return self.access_code_hash is not None
     audit_events: Mapped[list["AuditEvent"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
 
 

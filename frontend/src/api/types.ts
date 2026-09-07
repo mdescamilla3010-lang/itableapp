@@ -13,6 +13,7 @@ export interface Tenant {
   subscription_plan: string;
   is_active: boolean;
   created_at: string;
+  code_required: boolean;
 }
 
 export interface TenantCreatePayload {
@@ -21,6 +22,25 @@ export interface TenantCreatePayload {
   subscription_plan?: string;
   is_active?: boolean;
   parrot_api_key?: string;
+}
+
+export interface TenantCreated extends Tenant {
+  access_code: string;
+}
+
+export interface AccessCodeVerifyResult {
+  valid: boolean;
+}
+
+export interface AccessCodeRotateResult {
+  access_code: string;
+}
+
+export interface Branch {
+  id: string;
+  tenant_id: string;
+  external_id: string;
+  name: string;
 }
 
 export interface OrderItemPayload {
