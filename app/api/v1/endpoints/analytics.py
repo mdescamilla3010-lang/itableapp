@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.api.deps import AuthSession, require_tenant_match
 from app.db.database import get_db
 from app.db.models import Tenant
 from app.schemas.analytics import (
@@ -28,7 +29,10 @@ def _ensure_tenant_exists(tenant_id: uuid.UUID, db: Session) -> None:
 
 @router.get("/analytics/staff-audit/{tenant_id}", response_model=FugasAuditReport)
 def get_staff_audit(
-    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+    tenant_id: uuid.UUID,
+    branch_id: uuid.UUID | None = None,
+    db: Session = Depends(get_db),
+    _session: AuthSession = Depends(require_tenant_match),
 ) -> FugasAuditReport:
     _ensure_tenant_exists(tenant_id, db)
     engine = FugasAnalyticsEngine(db=db, tenant_id=tenant_id, branch_id=branch_id)
@@ -36,7 +40,11 @@ def get_staff_audit(
 
 
 @router.get("/analytics/cash-audit/{tenant_id}", response_model=CajaAuditReport)
-def get_cash_audit(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> CajaAuditReport:
+def get_cash_audit(
+    tenant_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _session: AuthSession = Depends(require_tenant_match),
+) -> CajaAuditReport:
     _ensure_tenant_exists(tenant_id, db)
     engine = CajaAnalyticsEngine(db=db, tenant_id=tenant_id)
     return engine.analyze_cashier_discrepancies()
@@ -44,7 +52,10 @@ def get_cash_audit(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> CajaA
 
 @router.get("/analytics/menu-engineering/{tenant_id}", response_model=MenuEngineeringReport)
 def get_menu_engineering(
-    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+    tenant_id: uuid.UUID,
+    branch_id: uuid.UUID | None = None,
+    db: Session = Depends(get_db),
+    _session: AuthSession = Depends(require_tenant_match),
 ) -> MenuEngineeringReport:
     _ensure_tenant_exists(tenant_id, db)
     engine = MenuEngineeringEngine(db=db, tenant_id=tenant_id, branch_id=branch_id)
@@ -57,6 +68,7 @@ def get_financial_dashboard(
     branch_id: uuid.UUID | None = None,
     days: int = 30,
     db: Session = Depends(get_db),
+    _session: AuthSession = Depends(require_tenant_match),
 ) -> FinancialDashboardReport:
     _ensure_tenant_exists(tenant_id, db)
     engine = FinancialAnalyticsEngine(db=db, tenant_id=tenant_id, branch_id=branch_id, period_days=days)

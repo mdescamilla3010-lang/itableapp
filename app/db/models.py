@@ -38,6 +38,7 @@ class Tenant(Base):
     staff_members: Mapped[list["Staff"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
     orders: Mapped[list["Order"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
     cash_shifts: Mapped[list["CashShift"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
+    users: Mapped[list["User"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
 
     @property
     def code_required(self) -> bool:
@@ -154,6 +155,33 @@ class CashShift(Base):
 
     tenant: Mapped["Tenant"] = relationship(back_populates="cash_shifts")
     staff: Mapped["Staff | None"] = relationship(back_populates="cash_shifts")
+
+
+class User(Base):
+    """A person who logs into a tenant's dashboard (e.g. the owner or a manager).
+
+    Distinct from Staff, which represents POS-side employees (waiters,
+    cashiers) synced from ingestion and never log in themselves.
+    """
+
+    __tablename__ = "users"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    tenant_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(String(50), nullable=False, default="admin")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    tenant: Mapped["Tenant"] = relationship(back_populates="users")
 
 
 class AuditEvent(Base):

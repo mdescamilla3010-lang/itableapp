@@ -36,6 +36,7 @@ class AccessCodeVerifyRequest(BaseModel):
 
 class AccessCodeVerifyResponse(BaseModel):
     valid: bool
+    access_token: str | None = None
 
 
 class AccessCodeRotateResponse(BaseModel):

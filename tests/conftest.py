@@ -10,9 +10,15 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
+from app.core.security import create_access_token
 from app.db.database import SessionLocal
 from app.db.models import Tenant
 from app.main import app
+
+
+def auth_headers_for(tenant_id: uuid.UUID) -> dict[str, str]:
+    token = create_access_token(tenant_id=tenant_id, role="code")
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture(autouse=True)
@@ -53,3 +59,8 @@ def tenant(db_session):
     db_session.commit()
     db_session.refresh(t)
     return t
+
+
+@pytest.fixture()
+def auth_headers(tenant):
+    return auth_headers_for(tenant.id)

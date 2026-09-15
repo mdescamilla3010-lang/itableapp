@@ -30,6 +30,7 @@ export interface TenantCreated extends Tenant {
 
 export interface AccessCodeVerifyResult {
   valid: boolean;
+  access_token: string | null;
 }
 
 export interface AccessCodeRotateResult {

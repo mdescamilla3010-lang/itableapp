@@ -5,7 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.api.deps import AuthSession, require_tenant_match
 from app.core.access_code import generate_access_code, hash_access_code, verify_access_code
+from app.core.security import create_access_token
 from app.db.database import get_db
 from app.db.models import Branch, Tenant
 from app.schemas.tenant import (
@@ -72,9 +74,14 @@ def verify_tenant_access(
 
     if tenant.access_code_hash is None:
         # Tenants created before this feature existed have no code set yet.
-        return AccessCodeVerifyResponse(valid=True)
+        token = create_access_token(tenant_id=tenant.id, role="code")
+        return AccessCodeVerifyResponse(valid=True, access_token=token)
 
-    return AccessCodeVerifyResponse(valid=verify_access_code(payload.code, tenant.access_code_hash))
+    if not verify_access_code(payload.code, tenant.access_code_hash):
+        return AccessCodeVerifyResponse(valid=False)
+
+    token = create_access_token(tenant_id=tenant.id, role="code")
+    return AccessCodeVerifyResponse(valid=True, access_token=token)
 
 
 @router.post("/tenants/{tenant_id}/rotate-access-code", response_model=AccessCodeRotateResponse)
@@ -96,7 +103,9 @@ def rotate_tenant_access_code(tenant_id: uuid.UUID, db: Session = Depends(get_db
 
 
 @router.get("/tenants/{tenant_id}/branches", response_model=list[BranchRead])
-def list_tenant_branches(tenant_id: uuid.UUID, db: Session = Depends(get_db)) -> list[Branch]:
+def list_tenant_branches(
+    tenant_id: uuid.UUID, db: Session = Depends(get_db), _session: AuthSession = Depends(require_tenant_match)
+) -> list[Branch]:
     tenant = db.execute(select(Tenant).where(Tenant.id == tenant_id)).scalar_one_or_none()
     if tenant is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tenant not found")

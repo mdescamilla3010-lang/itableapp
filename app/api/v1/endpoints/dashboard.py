@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.api.deps import AuthSession, require_tenant_match
 from app.db.database import get_db
 from app.db.models import Order, Tenant
 from app.schemas.analytics import DashboardSummary, MenuCategory, TopDogProduct, TopWaiterRisk
@@ -16,7 +17,10 @@ router = APIRouter()
 
 @router.get("/dashboard/summary/{tenant_id}", response_model=DashboardSummary)
 def get_dashboard_summary(
-    tenant_id: uuid.UUID, branch_id: uuid.UUID | None = None, db: Session = Depends(get_db)
+    tenant_id: uuid.UUID,
+    branch_id: uuid.UUID | None = None,
+    db: Session = Depends(get_db),
+    _session: AuthSession = Depends(require_tenant_match),
 ) -> DashboardSummary:
     tenant = db.execute(select(Tenant).where(Tenant.id == tenant_id)).scalar_one_or_none()
     if tenant is None:

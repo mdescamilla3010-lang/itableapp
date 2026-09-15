@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime, timezone
 
+from conftest import auth_headers_for
+
 
 def test_health(client):
     response = client.get("/api/v1/health")
@@ -44,13 +46,30 @@ def test_sync_for_missing_tenant_returns_404(client):
 
 
 def test_dashboard_for_missing_tenant_returns_404(client):
-    response = client.get(f"/api/v1/dashboard/summary/{uuid.uuid4()}")
+    missing_tenant_id = uuid.uuid4()
+    response = client.get(
+        f"/api/v1/dashboard/summary/{missing_tenant_id}", headers=auth_headers_for(missing_tenant_id)
+    )
     assert response.status_code == 404
 
 
 def test_financial_dashboard_for_missing_tenant_returns_404(client):
-    response = client.get(f"/api/v1/analytics/financial-dashboard/{uuid.uuid4()}")
+    missing_tenant_id = uuid.uuid4()
+    response = client.get(
+        f"/api/v1/analytics/financial-dashboard/{missing_tenant_id}",
+        headers=auth_headers_for(missing_tenant_id),
+    )
     assert response.status_code == 404
+
+
+def test_protected_endpoint_without_token_is_rejected(client, tenant):
+    response = client.get(f"/api/v1/dashboard/summary/{tenant.id}")
+    assert response.status_code == 401
+
+
+def test_protected_endpoint_with_mismatched_tenant_token_is_forbidden(client, tenant):
+    response = client.get(f"/api/v1/dashboard/summary/{tenant.id}", headers=auth_headers_for(uuid.uuid4()))
+    assert response.status_code == 403
 
 
 def test_sync_and_dashboard_flow(client):
@@ -88,18 +107,20 @@ def test_sync_and_dashboard_flow(client):
     dedup_resp = client.post(f"/api/v1/sync/{tenant_id}", json=payload)
     assert dedup_resp.json()["orders_skipped_duplicate"] == 1
 
-    dashboard_resp = client.get(f"/api/v1/dashboard/summary/{tenant_id}")
+    headers = auth_headers_for(uuid.UUID(tenant_id))
+
+    dashboard_resp = client.get(f"/api/v1/dashboard/summary/{tenant_id}", headers=headers)
     assert dashboard_resp.status_code == 200
     assert dashboard_resp.json()["total_sales"] == "300.00"
 
-    staff_audit_resp = client.get(f"/api/v1/analytics/staff-audit/{tenant_id}")
+    staff_audit_resp = client.get(f"/api/v1/analytics/staff-audit/{tenant_id}", headers=headers)
     assert staff_audit_resp.status_code == 200
 
-    menu_resp = client.get(f"/api/v1/analytics/menu-engineering/{tenant_id}")
+    menu_resp = client.get(f"/api/v1/analytics/menu-engineering/{tenant_id}", headers=headers)
     assert menu_resp.status_code == 200
     assert menu_resp.json()["items"][0]["product_name"] == "Torta"
 
-    cash_resp = client.get(f"/api/v1/analytics/cash-audit/{tenant_id}")
+    cash_resp = client.get(f"/api/v1/analytics/cash-audit/{tenant_id}", headers=headers)
     assert cash_resp.status_code == 200
 
 
@@ -134,7 +155,9 @@ def test_cash_shift_sync_and_audit_flow(client):
     dedup_resp = client.post(f"/api/v1/sync/{tenant_id}/cash-shifts", json=payload)
     assert dedup_resp.json()["shifts_skipped_duplicate"] == 1
 
-    cash_resp = client.get(f"/api/v1/analytics/cash-audit/{tenant_id}")
+    cash_resp = client.get(
+        f"/api/v1/analytics/cash-audit/{tenant_id}", headers=auth_headers_for(uuid.UUID(tenant_id))
+    )
     assert cash_resp.status_code == 200
     body = cash_resp.json()
     assert body["total_accumulated_discrepancy"] == "-50.00"
@@ -176,7 +199,10 @@ def test_financial_dashboard_reflects_synced_orders(client):
     sync_resp = client.post(f"/api/v1/sync/{tenant_id}", json=payload)
     assert sync_resp.status_code == 201
 
-    response = client.get(f"/api/v1/analytics/financial-dashboard/{tenant_id}?days=1")
+    response = client.get(
+        f"/api/v1/analytics/financial-dashboard/{tenant_id}?days=1",
+        headers=auth_headers_for(uuid.UUID(tenant_id)),
+    )
     assert response.status_code == 200
     body = response.json()
     assert body["total_revenue"] == "200.00"

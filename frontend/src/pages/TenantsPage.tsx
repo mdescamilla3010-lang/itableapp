@@ -27,12 +27,21 @@ export function TenantsPage() {
   );
   const [pendingTenant, setPendingTenant] = useState<Tenant | null>(null);
 
+  const openTenantMutation = useMutation({
+    mutationFn: (tenant: Tenant) => tenantsApi.verifyAccess(tenant.id, ""),
+    onSuccess: (result, tenant) => {
+      if (result.access_token) {
+        selectTenant(tenant.id, result.access_token);
+        navigate("/");
+      }
+    },
+  });
+
   function handleChooseTenant(tenant: Tenant) {
     if (tenant.code_required) {
       setPendingTenant(tenant);
     } else {
-      selectTenant(tenant.id);
-      navigate("/");
+      openTenantMutation.mutate(tenant);
     }
   }
 
@@ -206,8 +215,8 @@ export function TenantsPage() {
         <AccessCodePrompt
           tenant={pendingTenant}
           onCancel={() => setPendingTenant(null)}
-          onSuccess={() => {
-            selectTenant(pendingTenant.id);
+          onSuccess={(accessToken) => {
+            selectTenant(pendingTenant.id, accessToken);
             setPendingTenant(null);
             navigate("/");
           }}
@@ -251,7 +260,7 @@ function AccessCodePrompt({
 }: {
   tenant: Tenant;
   onCancel: () => void;
-  onSuccess: () => void;
+  onSuccess: (accessToken: string) => void;
 }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -259,8 +268,8 @@ function AccessCodePrompt({
   const verifyMutation = useMutation({
     mutationFn: () => tenantsApi.verifyAccess(tenant.id, code.trim()),
     onSuccess: (result) => {
-      if (result.valid) {
-        onSuccess();
+      if (result.valid && result.access_token) {
+        onSuccess(result.access_token);
       } else {
         setError("Código incorrecto. Verifica con quien te lo compartió.");
       }

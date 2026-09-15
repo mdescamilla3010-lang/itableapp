@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { setAccessToken } from "../lib/session";
 import { TenantContext } from "./tenantContextStore";
 
 const STORAGE_KEY = "itable:currentTenantId";
@@ -12,12 +13,13 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const selectTenant = useCallback((tenantId: string) => {
+  const selectTenant = useCallback((tenantId: string, accessToken: string) => {
     try {
       localStorage.setItem(STORAGE_KEY, tenantId);
     } catch {
       // localStorage unavailable (private mode, etc.) — state still works in-memory
     }
+    setAccessToken(accessToken);
     setCurrentTenantId(tenantId);
   }, []);
 
@@ -27,6 +29,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
+    setAccessToken(null);
     setCurrentTenantId(null);
   }, []);
 
