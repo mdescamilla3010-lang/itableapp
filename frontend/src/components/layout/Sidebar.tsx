@@ -3,6 +3,7 @@ import {
   BuildingIcon,
   DashboardIcon,
   GridIcon,
+  TrendIcon,
   UploadIcon,
   UsersIcon,
   WalletIcon,
@@ -11,6 +12,7 @@ import { Logomark } from "./Logomark";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: DashboardIcon, end: true },
+  { to: "/financial-dashboard", label: "Dashboard financiero", icon: TrendIcon },
   { to: "/staff-audit", label: "Auditoría de meseros", icon: UsersIcon },
   { to: "/menu-engineering", label: "Ingeniería de menú", icon: GridIcon },
   { to: "/cash-audit", label: "Auditoría de caja", icon: WalletIcon },

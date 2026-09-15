@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 
 def test_health(client):
@@ -44,6 +45,11 @@ def test_sync_for_missing_tenant_returns_404(client):
 
 def test_dashboard_for_missing_tenant_returns_404(client):
     response = client.get(f"/api/v1/dashboard/summary/{uuid.uuid4()}")
+    assert response.status_code == 404
+
+
+def test_financial_dashboard_for_missing_tenant_returns_404(client):
+    response = client.get(f"/api/v1/analytics/financial-dashboard/{uuid.uuid4()}")
     assert response.status_code == 404
 
 
@@ -138,3 +144,41 @@ def test_cash_shift_sync_and_audit_flow(client):
 def test_cash_shift_sync_for_missing_tenant_returns_404(client):
     response = client.post(f"/api/v1/sync/{uuid.uuid4()}/cash-shifts", json={"shifts": []})
     assert response.status_code == 404
+
+
+def test_financial_dashboard_reflects_synced_orders(client):
+    tenant_resp = client.post(
+        "/api/v1/tenants", json={"name": "Restaurante Financiero", "slug": "restaurante-financiero-test"}
+    )
+    tenant_id = tenant_resp.json()["id"]
+
+    today = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    payload = {
+        "orders": [
+            {
+                "external_order_id": "ORD-FIN-1",
+                "total_amount": "200.00",
+                "discount_amount": "0",
+                "status": "COMPLETED",
+                "order_date": today,
+                "items": [
+                    {
+                        "external_product_id": "PF-1",
+                        "product_name": "Café",
+                        "quantity": 2,
+                        "unit_price": "100.00",
+                        "unit_cost": "40.00",
+                    }
+                ],
+            }
+        ]
+    }
+    sync_resp = client.post(f"/api/v1/sync/{tenant_id}", json=payload)
+    assert sync_resp.status_code == 201
+
+    response = client.get(f"/api/v1/analytics/financial-dashboard/{tenant_id}?days=1")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total_revenue"] == "200.00"
+    assert len(body["daily_revenue"]) == 1
+    assert len(body["projection"]) == 7

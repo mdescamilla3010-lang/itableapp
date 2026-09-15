@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from decimal import Decimal
 from enum import StrEnum
@@ -84,6 +85,28 @@ class TopDogProduct(BaseModel):
     product_name: str
     quantity_sold: int
     unit_margin: Decimal
+
+
+class DailyRevenue(BaseModel):
+    date: datetime.date
+    total_sales: Decimal
+    order_count: int
+
+
+class CashFlowProjection(BaseModel):
+    date: datetime.date
+    projected_amount: Decimal
+
+
+class FinancialDashboardReport(BaseModel):
+    tenant_id: uuid.UUID
+    period_days: int
+    total_revenue: Decimal
+    avg_daily_revenue: Decimal
+    avg_ticket: Decimal
+    growth_vs_previous_period: float | None
+    daily_revenue: list[DailyRevenue] = Field(default_factory=list)
+    projection: list[CashFlowProjection] = Field(default_factory=list)
 
 
 class DashboardSummary(BaseModel):

@@ -5,6 +5,7 @@ import { RequireTenant } from "./components/layout/RequireTenant";
 import { TenantProvider } from "./context/TenantContext";
 import { CashAuditPage } from "./pages/CashAuditPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { FinancialDashboardPage } from "./pages/FinancialDashboardPage";
 import { MenuEngineeringPage } from "./pages/MenuEngineeringPage";
 import { StaffAuditPage } from "./pages/StaffAuditPage";
 import { SyncTestPage } from "./pages/SyncTestPage";
@@ -30,6 +31,7 @@ export default function App() {
 
               <Route element={<RequireTenant />}>
                 <Route index element={<DashboardPage />} />
+                <Route path="/financial-dashboard" element={<FinancialDashboardPage />} />
                 <Route path="/staff-audit" element={<StaffAuditPage />} />
                 <Route path="/menu-engineering" element={<MenuEngineeringPage />} />
                 <Route path="/cash-audit" element={<CashAuditPage />} />

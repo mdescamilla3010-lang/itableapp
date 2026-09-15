@@ -183,6 +183,28 @@ export interface TopDogProduct {
   unit_margin: string;
 }
 
+export interface DailyRevenue {
+  date: string;
+  total_sales: string;
+  order_count: number;
+}
+
+export interface CashFlowProjection {
+  date: string;
+  projected_amount: string;
+}
+
+export interface FinancialDashboardReport {
+  tenant_id: string;
+  period_days: number;
+  total_revenue: string;
+  avg_daily_revenue: string;
+  avg_ticket: string;
+  growth_vs_previous_period: number | null;
+  daily_revenue: DailyRevenue[];
+  projection: CashFlowProjection[];
+}
+
 export interface DashboardSummary {
   tenant_id: string;
   total_sales: string;

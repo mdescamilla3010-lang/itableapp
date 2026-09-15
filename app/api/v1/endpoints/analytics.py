@@ -6,8 +6,14 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Tenant
-from app.schemas.analytics import CajaAuditReport, FugasAuditReport, MenuEngineeringReport
+from app.schemas.analytics import (
+    CajaAuditReport,
+    FinancialDashboardReport,
+    FugasAuditReport,
+    MenuEngineeringReport,
+)
 from app.services.analytics_caja import CajaAnalyticsEngine
+from app.services.analytics_financial import FinancialAnalyticsEngine
 from app.services.analytics_fugas import FugasAnalyticsEngine
 from app.services.analytics_menu import MenuEngineeringEngine
 
@@ -43,3 +49,15 @@ def get_menu_engineering(
     _ensure_tenant_exists(tenant_id, db)
     engine = MenuEngineeringEngine(db=db, tenant_id=tenant_id, branch_id=branch_id)
     return engine.analyze_menu()
+
+
+@router.get("/analytics/financial-dashboard/{tenant_id}", response_model=FinancialDashboardReport)
+def get_financial_dashboard(
+    tenant_id: uuid.UUID,
+    branch_id: uuid.UUID | None = None,
+    days: int = 30,
+    db: Session = Depends(get_db),
+) -> FinancialDashboardReport:
+    _ensure_tenant_exists(tenant_id, db)
+    engine = FinancialAnalyticsEngine(db=db, tenant_id=tenant_id, branch_id=branch_id, period_days=days)
+    return engine.analyze_financials()

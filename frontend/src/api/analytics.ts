@@ -2,6 +2,7 @@ import { api } from "./client";
 import type {
   CajaAuditReport,
   DashboardSummary,
+  FinancialDashboardReport,
   FugasAuditReport,
   MenuEngineeringReport,
 } from "./types";
@@ -19,4 +20,9 @@ export const analyticsApi = {
     api.get<CajaAuditReport>(`/analytics/cash-audit/${tenantId}`),
   menuEngineering: (tenantId: string, branchId?: string | null) =>
     api.get<MenuEngineeringReport>(`/analytics/menu-engineering/${tenantId}${branchQuery(branchId)}`),
+  financialDashboard: (tenantId: string, branchId?: string | null, days = 30) => {
+    const params = new URLSearchParams({ days: String(days) });
+    if (branchId) params.set("branch_id", branchId);
+    return api.get<FinancialDashboardReport>(`/analytics/financial-dashboard/${tenantId}?${params.toString()}`);
+  },
 };
