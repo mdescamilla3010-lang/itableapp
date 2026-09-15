@@ -6,6 +6,7 @@ import { TenantProvider } from "./context/TenantContext";
 import { CashAuditPage } from "./pages/CashAuditPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { FinancialDashboardPage } from "./pages/FinancialDashboardPage";
+import { LoginPage } from "./pages/LoginPage";
 import { MenuEngineeringPage } from "./pages/MenuEngineeringPage";
 import { StaffAuditPage } from "./pages/StaffAuditPage";
 import { SyncTestPage } from "./pages/SyncTestPage";
@@ -26,6 +27,8 @@ export default function App() {
       <TenantProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<LoginPage />} />
+
             <Route element={<AppShell />}>
               <Route path="/tenants" element={<TenantsPage />} />
 

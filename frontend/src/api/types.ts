@@ -214,6 +214,13 @@ export interface DashboardSummary {
   top_dog_products: TopDogProduct[];
 }
 
+export interface LoginResult {
+  access_token: string;
+  token_type: string;
+  tenant_id: string;
+  role: string;
+}
+
 export interface HealthStatus {
   status: string;
   project: string;

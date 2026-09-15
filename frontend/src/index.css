@@ -539,6 +539,11 @@ textarea.input:focus {
   box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
+.input:focus:invalid,
+textarea.input:focus:invalid {
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
 textarea.input {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
@@ -765,6 +770,107 @@ textarea.input {
 .finance-chart__swatch--projected {
   background: var(--color-primary-soft);
   border: 1px dashed var(--color-primary);
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: var(--color-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-7);
+  box-shadow: 0 12px 32px rgba(33, 25, 21, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.login-card__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.login-card__brand-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.login-card__title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  margin: 0 0 var(--space-1);
+}
+
+.login-card__subtitle {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.login-tabs {
+  display: flex;
+  padding: 4px;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+  gap: 4px;
+}
+
+.login-tab {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: calc(var(--radius-md) - 3px);
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.login-tab.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 3px rgba(33, 25, 21, 0.1);
+}
+
+.login-password-field {
+  position: relative;
+  display: flex;
+}
+
+.login-password-field .input {
+  padding-right: 40px;
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  border-radius: var(--radius-sm);
+}
+
+.login-password-toggle:hover {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
 }
 
 .center-page {
